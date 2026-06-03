@@ -14,51 +14,60 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing environment variables' });
   }
 
-  const { action, id, data } = req.body || {};
-
-  try {
-    // GET - Fetch all rows
-    if (req.method === 'GET') {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*`, {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        }
-      });
-      const result = await response.json();
-      return res.status(200).json(result);
-    }
-
-    // POST - Edit row (update)
-    if (req.method === 'POST' && action === 'edit') {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      return res.status(200).json({ success: true });
-    }
-
-    // DELETE - Delete row
-    if (req.method === 'DELETE') {
-      const { id } = req.body;
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        }
-      });
-      return res.status(200).json({ success: true });
-    }
-
-    return res.status(400).json({ error: 'Invalid action' });
-
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
+  // GET - Fetch all rows
+  if (req.method === 'GET') {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    const data = await response.json();
+    return res.status(200).json(data);
   }
+
+  // POST - Edit row
+  if (req.method === 'POST' && req.body.action === 'edit') {
+    const { id, data } = req.body;
+    
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return res.status(400).json({ error });
+    }
+
+    return res.status(200).json({ success: true });
+  }
+
+  // DELETE - Delete row
+  if (req.method === 'DELETE') {
+    const { id } = req.body;
+    
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return res.status(400).json({ error });
+    }
+
+    return res.status(200).json({ success: true });
+  }
+
+  return res.status(400).json({ error: 'Invalid request' });
 }
