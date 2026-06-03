@@ -1,0 +1,20 @@
+{
+  "name": "facebook-auto-poster",
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/post-video.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "FACEBOOK_PAGE_ID": "@facebook_page_id",
+    "FACEBOOK_PAGE_TOKEN": "@facebook_page_token",
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key"
+  }
+}
