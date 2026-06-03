@@ -209,6 +209,12 @@
 
         async function loadAllData() {
             try {
+                // Show loading
+                document.getElementById('pending-loading').style.display = 'block';
+                document.getElementById('pending-container').style.display = 'none';
+                document.getElementById('failed-loading').style.display = 'block';
+                document.getElementById('failed-container').style.display = 'none';
+                
                 const response = await fetch(API_URL);
                 const allData = await response.json();
                 
@@ -225,17 +231,26 @@
                 document.getElementById('posted-count').textContent = posted;
                 document.getElementById('failed-count').textContent = failed;
                 
-                // Load pending (first 20)
+                // Render pending (first 20)
                 const pendingData = allData
                     .filter(row => row.status?.toLowerCase() === 'pending')
                     .slice(0, 20);
                 renderPendingTable(pendingData);
                 
-                // Load failed
+                // Render failed
                 const failedData = allData.filter(row => row.status?.toLowerCase() === 'failed');
                 renderFailedTable(failedData);
                 
+                // Hide loading, show tables
+                document.getElementById('pending-loading').style.display = 'none';
+                document.getElementById('pending-container').style.display = 'block';
+                document.getElementById('failed-loading').style.display = 'none';
+                document.getElementById('failed-container').style.display = 'block';
+                
             } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('pending-loading').innerHTML = `❌ Error: ${error.message}`;
+                document.getElementById('failed-loading').innerHTML = `❌ Error: ${error.message}`;
                 showToast(`❌ Error loading data: ${error.message}`, 'error');
             }
         }
@@ -343,12 +358,10 @@
             }
         });
 
-        // Reset all failed videos to pending
         async function resetAllFailed() {
             if (!confirm('Are you sure you want to reset all failed videos to pending?')) return;
             
             try {
-                // Fetch all failed videos
                 const response = await fetch(API_URL);
                 const allData = await response.json();
                 if (allData.error) throw new Error(allData.error);
@@ -360,7 +373,6 @@
                     return;
                 }
                 
-                // Update each failed video to pending
                 for (const row of failedData) {
                     await fetch(API_URL, {
                         method: 'POST',
