@@ -5,285 +5,620 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FB Auto Poster - Admin</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
+        
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .logo {
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
             text-align: center;
-            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-        .logo h1 {
+        
+        .header h1 {
             color: #1877f2;
             font-size: 28px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
-        .logo p {
-            color: #666;
+        
+        .header p {
+            color: #65676b;
             font-size: 14px;
         }
-        .welcome {
-            text-align: center;
-            padding: 20px;
-            background: #f0f2f5;
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status-badge.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .card {
+            background: white;
             border-radius: 12px;
-            margin-bottom: 30px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-        .welcome h2 {
-            color: #333;
-            font-size: 22px;
-            margin-bottom: 10px;
+        
+        .card h2 {
+            font-size: 18px;
+            color: #1a1a2e;
+            margin-bottom: 16px;
         }
-        .welcome p {
-            color: #555;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .env-setup {
-            background: #1a1a2e;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .env-setup h3 {
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        .env-item {
-            background: #2a2a4a;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .env-item .key {
-            color: #4ade80;
-            font-family: monospace;
-            font-size: 14px;
-        }
-        .env-item .value {
-            color: #fbbf24;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
-            margin-top: 4px;
-        }
-        .env-item .description {
-            color: #94a3b8;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-        .btn {
-            display: block;
+        
+        .btn-primary {
             width: 100%;
             padding: 14px;
             background: #1877f2;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 20px;
-            text-decoration: none;
-            text-align: center;
+            transition: background 0.2s;
         }
-        .btn:hover {
+        
+        .btn-primary:hover {
             background: #166fe5;
         }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #888;
-            font-size: 12px;
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
-        .status {
+        
+        .btn-secondary {
+            padding: 10px 24px;
+            background: #e4e6eb;
+            color: #050505;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #d8dadf;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .modal h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #1a1a2e;
+        }
+        
+        .modal textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        
+        .modal textarea:focus {
+            outline: none;
+            border-color: #1877f2;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
+        
+        /* Progress/Status */
+        .progress-container {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
             display: none;
         }
-        .status.success {
+        
+        .progress-container.active {
             display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
         }
-        .status.error {
+        
+        .progress-step {
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .progress-step .icon {
+            font-size: 20px;
+        }
+        
+        .progress-step .text {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .progress-step.done {
+            background: #e8f5e9;
+        }
+        
+        .progress-step.done .text {
+            color: #2e7d32;
+        }
+        
+        .progress-step.error {
+            background: #ffebee;
+        }
+        
+        .progress-step.error .text {
+            color: #c62828;
+        }
+        
+        .progress-step .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #1877f2;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .result-card {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .result-card.success {
             display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
         }
-        .copy-btn {
-            background: #4ade80;
-            color: #1a1a2e;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 4px;
-            cursor: pointer;
+        
+        .result-card.error {
+            display: block;
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .video-preview {
+            display: none;
+            margin-top: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .video-preview.active {
+            display: block;
+        }
+        
+        .video-preview video {
+            width: 100%;
+            border-radius: 8px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-item .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1877f2;
+        }
+        
+        .stat-item .label {
             font-size: 12px;
-            margin-left: 8px;
+            color: #65676b;
+            margin-top: 4px;
         }
-        .copy-btn:hover {
-            background: #22c55e;
+        
+        .log-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+        
+        .log-container.active {
+            display: block;
+        }
+        
+        .log-line {
+            color: #4ade80;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 0;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        
+        .log-line.error {
+            color: #f87171;
+        }
+        
+        .log-line.info {
+            color: #60a5fa;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Logo -->
-        <div class="logo">
-            <h1>📱 FB Auto Poster</h1>
-            <p>Facebook Page Automation System</p>
+        <!-- Header -->
+        <div class="header">
+            <h1>📹 FB Auto Poster</h1>
+            <p>Post videos from Google Drive to Facebook Page</p>
+            <span class="status-badge active">✅ System Active</span>
         </div>
 
-        <!-- Welcome -->
-        <div class="welcome">
-            <h2>👋 Welcome, Admin!</h2>
-            <p>
-                Your Facebook Page is connected and ready for automation.<br>
-                <strong>Status:</strong> <span style="color: #4ade80;">✅ Active</span>
-            </p>
-        </div>
-
-        <!-- .env Setup Guide -->
-        <div class="env-setup">
-            <h3>🔐 Setup .env for Vercel</h3>
+        <!-- Main Card -->
+        <div class="card">
+            <h2>🎬 Video Queue</h2>
             
-            <div class="env-item">
-                <div class="key">FACEBOOK_PAGE_ID</div>
-                <div class="value">your_page_id_here</div>
-                <div class="description">Your Facebook Page ID</div>
+            <div class="stats" id="stats">
+                <div class="stat-item">
+                    <div class="number" id="pendingCount">0</div>
+                    <div class="label">Pending</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number" id="postedCount">0</div>
+                    <div class="label">Posted</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number" id="failedCount">0</div>
+                    <div class="label">Failed</div>
+                </div>
             </div>
 
-            <div class="env-item">
-                <div class="key">FACEBOOK_PAGE_TOKEN</div>
-                <div class="value">your_page_token_here</div>
-                <div class="description">Your Facebook Page Access Token</div>
-            </div>
-
-            <div class="env-item">
-                <div class="key">SUPABASE_URL</div>
-                <div class="value">https://your-project.supabase.co</div>
-                <div class="description">Your Supabase project URL</div>
-            </div>
-
-            <div class="env-item">
-                <div class="key">SUPABASE_ANON_KEY</div>
-                <div class="value">your_supabase_anon_key</div>
-                <div class="description">Your Supabase anonymous key</div>
-            </div>
-
-            <div class="env-item">
-                <div class="key">NEXT_PUBLIC_APP_URL</div>
-                <div class="value">https://your-app.vercel.app</div>
-                <div class="description">Your Vercel app URL</div>
-            </div>
-
-            <!-- Copy .env template -->
-            <button class="btn" onclick="copyEnvTemplate()" style="background: #4ade80; color: #1a1a2e; margin-top: 10px;">
-                📋 Copy .env Template
+            <button class="btn-primary" id="postBtn" onclick="openModal()">
+                📤 Post Next Video
             </button>
+
+            <!-- Progress Steps -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-step" id="step1">
+                    <span class="icon">📥</span>
+                    <span class="text">Fetching video from queue...</span>
+                </div>
+                <div class="progress-step" id="step2">
+                    <span class="icon">⬇️</span>
+                    <span class="text">Downloading from Google Drive...</span>
+                </div>
+                <div class="progress-step" id="step3">
+                    <span class="icon">📤</span>
+                    <span class="text">Uploading to Facebook...</span>
+                </div>
+                <div class="progress-step" id="step4">
+                    <span class="icon">✅</span>
+                    <span class="text">Updating status...</span>
+                </div>
+            </div>
+
+            <!-- Logs -->
+            <div class="log-container" id="logContainer">
+                <div id="logContent"></div>
+            </div>
+
+            <!-- Result -->
+            <div class="result-card" id="resultCard">
+                <div id="resultMessage"></div>
+            </div>
+
+            <!-- Video Preview -->
+            <div class="video-preview" id="videoPreview">
+                <video controls id="previewVideo"></video>
+            </div>
         </div>
 
-        <!-- Status Message -->
-        <div id="status" class="status"></div>
-
-        <!-- Next Steps -->
-        <a href="#" class="btn" onclick="showNextSteps()">
-            🚀 Go to Dashboard
-        </a>
-
-        <!-- Footer -->
-        <div class="footer">
-            Built with ❤️ for Facebook Automation • v1.0
+        <!-- Caption Modal -->
+        <div class="modal-overlay" id="captionModal">
+            <div class="modal">
+                <h3>✏️ Enter Caption</h3>
+                <textarea id="captionInput" placeholder="Write a caption for your video..."></textarea>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn-primary" onclick="postVideo()" style="width: auto;">Post Now</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Copy .env template to clipboard
-        function copyEnvTemplate() {
-            const envTemplate = `# Facebook Configuration
-FACEBOOK_PAGE_ID=your_page_id_here
-FACEBOOK_PAGE_TOKEN=your_page_token_here
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_ENDPOINT = '/api/post-video'; // Vercel serverless function
 
-# Supabase Configuration
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your_supabase_anon_key
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const postBtn = document.getElementById('postBtn');
+        const captionModal = document.getElementById('captionModal');
+        const captionInput = document.getElementById('captionInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const logContainer = document.getElementById('logContainer');
+        const logContent = document.getElementById('logContent');
+        const resultCard = document.getElementById('resultCard');
+        const resultMessage = document.getElementById('resultMessage');
+        const videoPreview = document.getElementById('videoPreview');
+        const previewVideo = document.getElementById('previewVideo');
+        
+        // Progress steps
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const step4 = document.getElementById('step4');
 
-# App Configuration
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app`;
+        // Stats
+        const pendingCount = document.getElementById('pendingCount');
+        const postedCount = document.getElementById('postedCount');
+        const failedCount = document.getElementById('failedCount');
 
-            navigator.clipboard.writeText(envTemplate).then(() => {
-                showStatus('✅ .env template copied to clipboard!', 'success');
-            }).catch(() => {
-                // Fallback
-                const textarea = document.createElement('textarea');
-                textarea.value = envTemplate;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showStatus('✅ .env template copied to clipboard!', 'success');
+        // ============================================
+        // FUNCTIONS
+        // ============================================
+
+        // Open caption modal
+        function openModal() {
+            captionModal.classList.add('active');
+            captionInput.value = '';
+            captionInput.focus();
+        }
+
+        // Close caption modal
+        function closeModal() {
+            captionModal.classList.remove('active');
+        }
+
+        // Reset progress display
+        function resetProgress() {
+            const steps = [step1, step2, step3, step4];
+            steps.forEach(step => {
+                step.className = 'progress-step';
+                const icon = step.querySelector('.icon');
+                const text = step.querySelector('.text');
+                // Reset icons and text
+                const icons = ['📥', '⬇️', '📤', '✅'];
+                const texts = [
+                    'Fetching video from queue...',
+                    'Downloading from Google Drive...',
+                    'Uploading to Facebook...',
+                    'Updating status...'
+                ];
+                const idx = steps.indexOf(step);
+                icon.textContent = icons[idx];
+                text.textContent = texts[idx];
             });
-        }
-
-        // Show status message
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${type}`;
-            setTimeout(() => {
-                status.className = 'status';
-            }, 5000);
-        }
-
-        // Show next steps
-        function showNextSteps() {
-            const steps = [
-                '1️⃣ Create a .env file in your project root',
-                '2️⃣ Add your Facebook credentials',
-                '3️⃣ Add your Supabase credentials',
-                '4️⃣ Deploy to Vercel with environment variables',
-                '5️⃣ Start posting videos automatically!'
-            ];
             
-            const status = document.getElementById('status');
-            status.innerHTML = steps.map(step => `📌 ${step}`).join('<br>');
-            status.className = 'status success';
+            progressContainer.classList.remove('active');
+            logContainer.classList.remove('active');
+            logContent.innerHTML = '';
+            resultCard.className = 'result-card';
+            videoPreview.classList.remove('active');
+            postBtn.disabled = false;
         }
 
-        // Check if we have page token stored
-        document.addEventListener('DOMContentLoaded', function() {
-            const pageToken = localStorage.getItem('facebook_page_token');
-            const pageId = localStorage.getItem('facebook_page_id');
+        // Add log entry
+        function addLog(message, type = 'info') {
+            logContainer.classList.add('active');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            const time = new Date().toLocaleTimeString();
+            line.textContent = `[${time}] ${message}`;
+            logContent.appendChild(line);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        // Update progress step
+        function updateStep(stepNumber, status = 'loading', message = null) {
+            const steps = [step1, step2, step3, step4];
+            const step = steps[stepNumber - 1];
             
-            if (pageToken && pageId) {
-                // Update the .env guide with actual values
-                document.querySelectorAll('.env-item .value')[0].textContent = pageId;
-                document.querySelectorAll('.env-item .value')[1].textContent = pageToken.substring(0, 20) + '...' + pageToken.substring(pageToken.length - 10);
+            if (status === 'loading') {
+                step.className = 'progress-step';
+                // Add spinner
+                if (!step.querySelector('.spinner')) {
+                    const spinner = document.createElement('div');
+                    spinner.className = 'spinner';
+                    step.querySelector('.icon').after(spinner);
+                }
+            } else if (status === 'done') {
+                step.className = 'progress-step done';
+                const spinner = step.querySelector('.spinner');
+                if (spinner) spinner.remove();
+                step.querySelector('.icon').textContent = '✅';
+            } else if (status === 'error') {
+                step.className = 'progress-step error';
+                const spinner = step.querySelector('.spinner');
+                if (spinner) spinner.remove();
+                step.querySelector('.icon').textContent = '❌';
+            }
+            
+            if (message) {
+                step.querySelector('.text').textContent = message;
+            }
+        }
+
+        // Show result
+        function showResult(success, message) {
+            resultCard.className = `result-card ${success ? 'success' : 'error'}`;
+            resultMessage.textContent = message;
+            postBtn.disabled = false;
+        }
+
+        // Update stats
+        function updateStats(pending, posted, failed) {
+            pendingCount.textContent = pending || 0;
+            postedCount.textContent = posted || 0;
+            failedCount.textContent = failed || 0;
+        }
+
+        // ============================================
+        // MAIN POST FUNCTION
+        // ============================================
+        async function postVideo() {
+            const caption = captionInput.value.trim();
+            
+            if (!caption) {
+                alert('Please enter a caption for the video');
+                return;
+            }
+            
+            // Close modal
+            closeModal();
+            
+            // Reset and show progress
+            resetProgress();
+            progressContainer.classList.add('active');
+            postBtn.disabled = true;
+            
+            // Update step 1
+            updateStep(1, 'loading', 'Fetching pending video from queue...');
+            addLog('🔍 Searching for pending video...');
+            
+            try {
+                // Call backend API
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ caption })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to post video');
+                }
+                
+                // Update stats
+                updateStats(data.pending, data.posted, data.failed);
+                
+                // Show video preview if available
+                if (data.videoUrl) {
+                    previewVideo.src = data.videoUrl;
+                    videoPreview.classList.add('active');
+                }
+                
+                // Show success
+                updateStep(4, 'done', '✅ Video posted successfully!');
+                showResult(true, `🎉 Video posted to Facebook! Post ID: ${data.postId}`);
+                addLog(`✅ Posted successfully! Post ID: ${data.postId}`, 'info');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                updateStep(4, 'error', '❌ Posting failed');
+                showResult(false, `❌ ${error.message}`);
+                addLog(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        // Close modal on Enter key
+        captionInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                postVideo();
             }
         });
+
+        // Close modal on overlay click
+        captionModal.addEventListener('click', (e) => {
+            if (e.target === captionModal) {
+                closeModal();
+            }
+        });
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        // Load stats on page load
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                updateStats(data.pending, data.posted, data.failed);
+            } catch (error) {
+                console.warn('Could not load stats:', error);
+            }
+        }
+        
+        loadStats();
     </script>
 </body>
 </html>
