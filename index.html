@@ -11,7 +11,7 @@
         .container { max-width: 1400px; margin: 0 auto; }
         
         .section { background: white; border-radius: 8px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .section h2 { margin-bottom: 20px; color: #333; }
+        .section h2 { margin-bottom: 20px; color: #333; display: flex; align-items: center; justify-content: space-between; }
         
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
@@ -23,6 +23,8 @@
         .btn-post:hover { background: #166fe5; }
         .btn-post:disabled { background: #ccc; cursor: not-allowed; }
         .btn-close { background: #6c757d; color: white; }
+        .btn-reset { background: #ff9800; color: white; }
+        .btn-reset:hover { background: #e68900; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; max-width: 500px; width: 100%; }
@@ -38,7 +40,6 @@
         .status-failed { background: #dc3545; color: white; }
         .status-processing { background: #17a2b8; color: white; }
         
-        .preview-frame { border: none; border-radius: 4px; width: 160px; height: 90px; }
         .link-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .count-badge { background: #ffc107; color: #333; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-left: 10px; }
@@ -48,13 +49,17 @@
         .toast-success { background: #28a745; }
         .toast-error { background: #dc3545; }
         .toast-info { background: #17a2b8; }
+        
+        .section-header { display: flex; align-items: center; gap: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Pending Section -->
         <div class="section">
-            <h2>📹 Pending Videos <span id="pending-count" class="count-badge">0 pending</span></h2>
+            <div class="section-header">
+                <h2>📹 Pending Videos <span id="pending-count" class="count-badge">0 pending</span></h2>
+            </div>
             <div id="pending-loading" class="loading">Loading pending videos...</div>
             <div id="pending-container" style="display:none;">
                 <table>
@@ -62,7 +67,6 @@
                         <tr>
                             <th>ID</th>
                             <th>Link</th>
-                            <th>Preview</th>
                             <th>Status</th>
                             <th>Created At</th>
                             <th>Action</th>
@@ -75,7 +79,10 @@
 
         <!-- Failed Section -->
         <div class="section">
-            <h2>❌ Failed Videos <span id="failed-count" class="failed-badge">0 failed</span></h2>
+            <div class="section-header">
+                <h2>❌ Failed Videos <span id="failed-count" class="failed-badge">0 failed</span></h2>
+                <button class="btn btn-reset" onclick="resetAllFailed()">🔄 Reset All to Pending</button>
+            </div>
             <div id="failed-loading" class="loading">Loading failed videos...</div>
             <div id="failed-container" style="display:none;">
                 <table>
@@ -142,7 +149,6 @@
                 
                 if (allData.error) throw new Error(allData.error);
                 
-                // Filter pending and take first 20
                 const pendingData = allData
                     .filter(row => row.status?.toLowerCase() === 'pending')
                     .slice(0, 20);
@@ -168,7 +174,6 @@
                 
                 if (allData.error) throw new Error(allData.error);
                 
-                // Filter failed
                 const failedData = allData.filter(row => row.status?.toLowerCase() === 'failed');
                 
                 renderFailedTable(failedData);
@@ -186,23 +191,18 @@
             tbody.innerHTML = '';
             
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#666;">✅ No pending videos found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:#666;">✅ No pending videos found</td></tr>`;
                 return;
             }
             
             data.forEach(row => {
                 const tr = document.createElement('tr');
-                
-                const fileId = row.link?.match(/\/d\/(.+?)\//)?.[1] || '';
-                const previewUrl = fileId ? `https://drive.google.com/file/d/${fileId}/preview` : '';
-                
                 const created = new Date(row.created_at).toLocaleString();
                 const statusClass = `status-${row.status?.toLowerCase() || 'pending'}`;
                 
                 tr.innerHTML = `
                     <td>${row.id}</td>
                     <td class="link-cell"><a href="${row.link}" target="_blank" style="color:#007bff;">${row.link}</a></td>
-                    <td>${fileId ? `<iframe src="${previewUrl}" class="preview-frame" allowfullscreen loading="lazy"></iframe>` : '-'}</td>
                     <td><span class="status-badge ${statusClass}">${row.status || 'pending'}</span></td>
                     <td>${created}</td>
                     <td>
@@ -289,6 +289,44 @@
                 postBtn.textContent = 'Post Now';
             }
         });
+
+        // Reset all failed videos to pending
+        async function resetAllFailed() {
+            if (!confirm('Are you sure you want to reset all failed videos to pending?')) return;
+            
+            try {
+                // Fetch all failed videos
+                const response = await fetch(API_URL);
+                const allData = await response.json();
+                if (allData.error) throw new Error(allData.error);
+                
+                const failedData = allData.filter(row => row.status?.toLowerCase() === 'failed');
+                
+                if (failedData.length === 0) {
+                    showToast('No failed videos to reset', 'info');
+                    return;
+                }
+                
+                // Update each failed video to pending
+                for (const row of failedData) {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'edit',
+                            id: row.id,
+                            data: { status: 'pending' }
+                        })
+                    });
+                }
+                
+                showToast(`✅ Reset ${failedData.length} failed videos to pending`, 'success');
+                loadPendingVideos();
+                loadFailedVideos();
+            } catch (error) {
+                showToast(`❌ Error resetting: ${error.message}`, 'error');
+            }
+        }
 
         document.getElementById('post-modal').addEventListener('click', function(e) {
             if (e.target === this) closePostModal();
