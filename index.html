@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facebook Video Poster</title>
@@ -11,6 +10,50 @@
         
         .container { max-width: 1400px; margin: 0 auto; }
         
+        /* Summary Bar */
+        .summary-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            min-width: 120px;
+        }
+        
+        .summary-item .number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .summary-item .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .summary-total { background: #e3f2fd; }
+        .summary-total .number { color: #1976d2; }
+        
+        .summary-pending { background: #fff3e0; }
+        .summary-pending .number { color: #f57c00; }
+        
+        .summary-posted { background: #e8f5e9; }
+        .summary-posted .number { color: #388e3c; }
+        
+        .summary-failed { background: #ffebee; }
+        .summary-failed .number { color: #d32f2f; }
+        
         .section { background: white; border-radius: 8px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .section h2 { margin-bottom: 20px; color: #333; display: flex; align-items: center; justify-content: space-between; }
         
@@ -19,13 +62,21 @@
         th { background: #f8f9fa; font-weight: bold; }
         tr:hover { background: #f1f1f1; }
         
-        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; margin: 0 4px; font-size: 14px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin: 0 4px; font-size: 14px; font-weight: 500; }
         .btn-post { background: #1877f2; color: white; }
         .btn-post:hover { background: #166fe5; }
         .btn-post:disabled { background: #ccc; cursor: not-allowed; }
         .btn-close { background: #6c757d; color: white; }
-        .btn-reset { background: #ff9800; color: white; }
-        .btn-reset:hover { background: #e68900; }
+        .btn-reset { 
+            background: #ff9800; 
+            color: white; 
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .btn-reset:hover { background: #e68900; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; max-width: 500px; width: 100%; }
@@ -43,23 +94,41 @@
         
         .link-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
-        .count-badge { background: #ffc107; color: #333; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-left: 10px; }
-        .failed-badge { background: #dc3545; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-left: 10px; }
-        
         .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: white; font-weight: bold; z-index: 2000; display: none; max-width: 400px; }
         .toast-success { background: #28a745; }
         .toast-error { background: #dc3545; }
         .toast-info { background: #17a2b8; }
         
-        .section-header { display: flex; align-items: center; gap: 15px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .section-header h2 { margin-bottom: 0; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Summary Bar -->
+        <div class="summary-bar">
+            <div class="summary-item summary-total">
+                <div class="number" id="total-count">0</div>
+                <div class="label">Total Videos</div>
+            </div>
+            <div class="summary-item summary-pending">
+                <div class="number" id="pending-count">0</div>
+                <div class="label">Pending</div>
+            </div>
+            <div class="summary-item summary-posted">
+                <div class="number" id="posted-count">0</div>
+                <div class="label">Posted</div>
+            </div>
+            <div class="summary-item summary-failed">
+                <div class="number" id="failed-count">0</div>
+                <div class="label">Failed</div>
+            </div>
+        </div>
+
         <!-- Pending Section -->
         <div class="section">
             <div class="section-header">
-                <h2>📹 Pending Videos <span id="pending-count" class="count-badge">0 pending</span></h2>
+                <h2>📹 Pending Videos</h2>
             </div>
             <div id="pending-loading" class="loading">Loading pending videos...</div>
             <div id="pending-container" style="display:none;">
@@ -81,7 +150,7 @@
         <!-- Failed Section -->
         <div class="section">
             <div class="section-header">
-                <h2>❌ Failed Videos <span id="failed-count" class="failed-badge">0 failed</span></h2>
+                <h2>❌ Failed Videos</h2>
                 <button class="btn btn-reset" onclick="resetAllFailed()">🔄 Reset All to Pending</button>
             </div>
             <div id="failed-loading" class="loading">Loading failed videos...</div>
@@ -125,8 +194,7 @@
         const API_URL = '/api/supabase';
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadPendingVideos();
-            loadFailedVideos();
+            loadAllData();
         });
 
         function showToast(message, type = 'info') {
@@ -139,51 +207,36 @@
             }, 5000);
         }
 
-        // Load first 20 pending videos
-        async function loadPendingVideos() {
+        async function loadAllData() {
             try {
-                document.getElementById('pending-loading').style.display = 'block';
-                document.getElementById('pending-container').style.display = 'none';
-                
                 const response = await fetch(API_URL);
                 const allData = await response.json();
                 
                 if (allData.error) throw new Error(allData.error);
                 
+                // Update summary
+                const total = allData.length;
+                const pending = allData.filter(row => row.status?.toLowerCase() === 'pending').length;
+                const posted = allData.filter(row => row.status?.toLowerCase() === 'posted').length;
+                const failed = allData.filter(row => row.status?.toLowerCase() === 'failed').length;
+                
+                document.getElementById('total-count').textContent = total;
+                document.getElementById('pending-count').textContent = pending;
+                document.getElementById('posted-count').textContent = posted;
+                document.getElementById('failed-count').textContent = failed;
+                
+                // Load pending (first 20)
                 const pendingData = allData
                     .filter(row => row.status?.toLowerCase() === 'pending')
                     .slice(0, 20);
-                
                 renderPendingTable(pendingData);
-                document.getElementById('pending-count').textContent = `${pendingData.length} pending`;
                 
-                document.getElementById('pending-loading').style.display = 'none';
-                document.getElementById('pending-container').style.display = 'block';
-            } catch (error) {
-                document.getElementById('pending-loading').innerHTML = `❌ Error: ${error.message}`;
-            }
-        }
-
-        // Load failed videos
-        async function loadFailedVideos() {
-            try {
-                document.getElementById('failed-loading').style.display = 'block';
-                document.getElementById('failed-container').style.display = 'none';
-                
-                const response = await fetch(API_URL);
-                const allData = await response.json();
-                
-                if (allData.error) throw new Error(allData.error);
-                
+                // Load failed
                 const failedData = allData.filter(row => row.status?.toLowerCase() === 'failed');
-                
                 renderFailedTable(failedData);
-                document.getElementById('failed-count').textContent = `${failedData.length} failed`;
                 
-                document.getElementById('failed-loading').style.display = 'none';
-                document.getElementById('failed-container').style.display = 'block';
             } catch (error) {
-                document.getElementById('failed-loading').innerHTML = `❌ Error: ${error.message}`;
+                showToast(`❌ Error loading data: ${error.message}`, 'error');
             }
         }
 
@@ -281,8 +334,7 @@
                 }
                 
                 closePostModal();
-                loadPendingVideos();
-                loadFailedVideos();
+                loadAllData();
             } catch (error) {
                 showToast(`❌ Error: ${error.message}`, 'error');
             } finally {
@@ -322,8 +374,7 @@
                 }
                 
                 showToast(`✅ Reset ${failedData.length} failed videos to pending`, 'success');
-                loadPendingVideos();
-                loadFailedVideos();
+                loadAllData();
             } catch (error) {
                 showToast(`❌ Error resetting: ${error.message}`, 'error');
             }
