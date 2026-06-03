@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automation Admin Dashboard</title>
+    <title>Automation Admin Dashboard - Pending Only</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
@@ -38,13 +38,15 @@
         
         .preview-frame { border: none; border-radius: 4px; width: 160px; height: 90px; }
         .link-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .count-badge { background: #ffc107; color: #333; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Automation Admin Dashboard</h1>
+        <h1>📊 Automation Admin Dashboard <span id="count-badge" class="count-badge">0 pending</span></h1>
         
-        <div id="loading" class="loading">Loading data...</div>
+        <div id="loading" class="loading">Loading pending data...</div>
         <div id="table-container" style="display:none;">
             <table>
                 <thead>
@@ -99,11 +101,16 @@
                 document.getElementById('table-container').style.display = 'none';
                 
                 const response = await fetch(API_URL);
-                const data = await response.json();
+                const allData = await response.json();
                 
-                if (data.error) throw new Error(data.error);
+                if (allData.error) throw new Error(allData.error);
                 
-                renderTable(data);
+                // Filter only pending rows
+                const pendingData = allData.filter(row => row.status?.toLowerCase() === 'pending');
+                
+                renderTable(pendingData);
+                updateCount(pendingData.length);
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('table-container').style.display = 'block';
             } catch (error) {
@@ -111,9 +118,18 @@
             }
         }
 
+        function updateCount(count) {
+            document.getElementById('count-badge').textContent = `${count} pending`;
+        }
+
         function renderTable(data) {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#666;">✅ No pending items found</td></tr>`;
+                return;
+            }
             
             data.forEach(row => {
                 const tr = document.createElement('tr');
@@ -144,8 +160,8 @@
         async function openEditModal(id) {
             try {
                 const response = await fetch(API_URL);
-                const data = await response.json();
-                const row = data.find(item => item.id === id);
+                const allData = await response.json();
+                const row = allData.find(item => item.id === id);
                 if (!row) throw new Error('Row not found');
                 
                 document.getElementById('edit-id').value = row.id;
@@ -195,7 +211,7 @@
                 if (result.error) throw new Error(result.error);
                 
                 closeModal();
-                loadData();
+                loadData(); // Refresh with pending only
                 alert('✅ Updated successfully!');
             } catch (error) {
                 alert('❌ Error updating: ' + error.message);
@@ -215,7 +231,7 @@
                 const result = await response.json();
                 if (result.error) throw new Error(result.error);
                 
-                loadData();
+                loadData(); // Refresh with pending only
                 alert('✅ Deleted successfully!');
             } catch (error) {
                 alert('❌ Error deleting: ' + error.message);
