@@ -1,418 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FB Auto Poster</title>
+    <title>Supabase Test</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-        
-        .container {
-            max-width: 600px;
-            width: 100%;
-        }
-        
-        .header {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        
-        .header h1 {
-            color: #1877f2;
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: #1877f2;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .btn-primary:hover {
-            background: #166fe5;
-        }
-        
-        .btn-primary:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .btn-secondary {
-            padding: 10px 24px;
-            background: #e4e6eb;
-            color: #050505;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .btn-secondary:hover {
-            background: #d8dadf;
-        }
-        
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        .modal h3 {
-            font-size: 20px;
-            margin-bottom: 16px;
-        }
-        
-        .modal textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-        }
-        
-        .modal textarea:focus {
-            outline: none;
-            border-color: #1877f2;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-            justify-content: flex-end;
-        }
-        
-        /* Progress */
-        .progress-container {
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .progress-container.active {
-            display: block;
-        }
-        
-        .progress-step {
-            padding: 12px 16px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .progress-step .icon {
-            font-size: 20px;
-        }
-        
-        .progress-step .text {
-            font-size: 14px;
-            color: #333;
-        }
-        
-        .progress-step.done {
-            background: #e8f5e9;
-        }
-        
-        .progress-step.done .text {
-            color: #2e7d32;
-        }
-        
-        .progress-step.error {
-            background: #ffebee;
-        }
-        
-        .progress-step.error .text {
-            color: #c62828;
-        }
-        
-        .progress-step .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #1877f2;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .result-card {
-            display: none;
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .result-card.success {
-            display: block;
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .result-card.error {
-            display: block;
-            background: #ffebee;
-            color: #c62828;
-        }
+        body { font-family: sans-serif; padding: 40px; text-align: center; }
+        .result { padding: 20px; margin: 20px; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        button { padding: 12px 24px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>📹 FB Auto Poster</h1>
-            <p>Post videos from Google Drive to Facebook</p>
-        </div>
-
-        <!-- Main Card -->
-        <div class="card">
-            <button class="btn-primary" id="postBtn" onclick="openModal()">
-                📤 Post Next Video
-            </button>
-
-            <!-- Progress -->
-            <div class="progress-container" id="progressContainer">
-                <div class="progress-step" id="step1">
-                    <span class="icon">📥</span>
-                    <span class="text">Fetching pending video...</span>
-                </div>
-                <div class="progress-step" id="step2">
-                    <span class="icon">⬇️</span>
-                    <span class="text">Downloading from Google Drive...</span>
-                </div>
-                <div class="progress-step" id="step3">
-                    <span class="icon">📤</span>
-                    <span class="text">Posting to Facebook...</span>
-                </div>
-                <div class="progress-step" id="step4">
-                    <span class="icon">✅</span>
-                    <span class="text">Updating status...</span>
-                </div>
-            </div>
-
-            <!-- Result -->
-            <div class="result-card" id="resultCard">
-                <div id="resultMessage"></div>
-            </div>
-        </div>
-
-        <!-- Caption Modal -->
-        <div class="modal-overlay" id="captionModal">
-            <div class="modal">
-                <h3>✏️ Enter Caption</h3>
-                <textarea id="captionInput" placeholder="Write a caption for your video..."></textarea>
-                <div class="modal-actions">
-                    <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn-primary" onclick="postVideo()" style="width: auto;">Post Now</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h1>🔍 Supabase Connection Test</h1>
+    <button onclick="testSupabase()">Test Connection</button>
+    <div id="result" class="result"></div>
 
     <script>
-        // ============================================
-        // CONFIGURATION - API endpoint only
-        // ============================================
-        const API_ENDPOINT = '/api/post-video';
-
-        // ============================================
-        // DOM ELEMENTS
-        // ============================================
-        const postBtn = document.getElementById('postBtn');
-        const captionModal = document.getElementById('captionModal');
-        const captionInput = document.getElementById('captionInput');
-        const progressContainer = document.getElementById('progressContainer');
-        const resultCard = document.getElementById('resultCard');
-        const resultMessage = document.getElementById('resultMessage');
-        
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const step3 = document.getElementById('step3');
-        const step4 = document.getElementById('step4');
-
-        // ============================================
-        // FUNCTIONS
-        // ============================================
-
-        function openModal() {
-            captionModal.classList.add('active');
-            captionInput.value = '';
-            captionInput.focus();
-        }
-
-        function closeModal() {
-            captionModal.classList.remove('active');
-        }
-
-        function resetProgress() {
-            const steps = [step1, step2, step3, step4];
-            steps.forEach(step => {
-                step.className = 'progress-step';
-                const icon = step.querySelector('.icon');
-                const text = step.querySelector('.text');
-                const icons = ['📥', '⬇️', '📤', '✅'];
-                const texts = [
-                    'Fetching pending video...',
-                    'Downloading from Google Drive...',
-                    'Posting to Facebook...',
-                    'Updating status...'
-                ];
-                const idx = steps.indexOf(step);
-                icon.textContent = icons[idx];
-                text.textContent = texts[idx];
-            });
-            
-            progressContainer.classList.remove('active');
-            resultCard.className = 'result-card';
-            postBtn.disabled = false;
-        }
-
-        function updateStep(stepNumber, status = 'loading', message = null) {
-            const steps = [step1, step2, step3, step4];
-            const step = steps[stepNumber - 1];
-            
-            if (status === 'loading') {
-                step.className = 'progress-step';
-                if (!step.querySelector('.spinner')) {
-                    const spinner = document.createElement('div');
-                    spinner.className = 'spinner';
-                    step.querySelector('.icon').after(spinner);
-                }
-            } else if (status === 'done') {
-                step.className = 'progress-step done';
-                const spinner = step.querySelector('.spinner');
-                if (spinner) spinner.remove();
-                step.querySelector('.icon').textContent = '✅';
-            } else if (status === 'error') {
-                step.className = 'progress-step error';
-                const spinner = step.querySelector('.spinner');
-                if (spinner) spinner.remove();
-                step.querySelector('.icon').textContent = '❌';
-            }
-            
-            if (message) {
-                step.querySelector('.text').textContent = message;
-            }
-        }
-
-        function showResult(success, message) {
-            resultCard.className = `result-card ${success ? 'success' : 'error'}`;
-            resultMessage.textContent = message;
-            postBtn.disabled = false;
-        }
-
-        // ============================================
-        // MAIN POST FUNCTION
-        // ============================================
-        async function postVideo() {
-            const caption = captionInput.value.trim();
-            
-            if (!caption) {
-                alert('Please enter a caption');
-                return;
-            }
-            
-            closeModal();
-            resetProgress();
-            progressContainer.classList.add('active');
-            postBtn.disabled = true;
-            
-            updateStep(1, 'loading');
+        async function testSupabase() {
+            const result = document.getElementById('result');
+            result.innerHTML = '⏳ Testing...';
             
             try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ caption })
-                });
-                
+                const response = await fetch('/api/test');
                 const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to post video');
+                if (data.status === '✅ SUCCESS') {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h2>${data.status}</h2>
+                        <p>${data.message}</p>
+                        <p>Found ${data.count} videos</p>
+                    `;
+                } else {
+                    result.className = 'result fail';
+                    result.innerHTML = `
+                        <h2>${data.status}</h2>
+                        <p>${data.message}</p>
+                        <p>SUPABASE_URL: ${data.url}</p>
+                        <p>SUPABASE_ANON_KEY: ${data.key}</p>
+                    `;
                 }
-                
-                updateStep(4, 'done', '✅ Video posted successfully!');
-                showResult(true, `🎉 Posted! Post ID: ${data.postId}`);
-                
             } catch (error) {
-                updateStep(4, 'error', '❌ Posting failed');
-                showResult(false, `❌ ${error.message}`);
+                result.className = 'result fail';
+                result.innerHTML = `<h2>❌ Error</h2><p>${error.message}</p>`;
             }
         }
-
-        // Close modal on Enter
-        captionInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                postVideo();
-            }
-        });
-
-        // Close modal on overlay click
-        captionModal.addEventListener('click', (e) => {
-            if (e.target === captionModal) {
-                closeModal();
-            }
-        });
     </script>
 </body>
 </html>
