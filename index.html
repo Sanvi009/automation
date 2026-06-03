@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FB Auto Poster - Admin</title>
+    <title>FB Auto Poster</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -35,37 +35,12 @@
             margin-bottom: 8px;
         }
         
-        .header p {
-            color: #65676b;
-            font-size: 14px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        
-        .status-badge.active {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        
         .card {
             background: white;
             border-radius: 12px;
             padding: 24px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-        }
-        
-        .card h2 {
-            font-size: 18px;
-            color: #1a1a2e;
-            margin-bottom: 16px;
         }
         
         .btn-primary {
@@ -99,7 +74,6 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
         }
         
         .btn-secondary:hover {
@@ -136,7 +110,6 @@
         .modal h3 {
             font-size: 20px;
             margin-bottom: 16px;
-            color: #1a1a2e;
         }
         
         .modal textarea {
@@ -162,7 +135,7 @@
             justify-content: flex-end;
         }
         
-        /* Progress/Status */
+        /* Progress */
         .progress-container {
             margin-top: 20px;
             display: none;
@@ -232,88 +205,12 @@
             display: block;
             background: #e8f5e9;
             color: #2e7d32;
-            border: 1px solid #c8e6c9;
         }
         
         .result-card.error {
             display: block;
             background: #ffebee;
             color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-        
-        .video-preview {
-            display: none;
-            margin-top: 16px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .video-preview.active {
-            display: block;
-        }
-        
-        .video-preview video {
-            width: 100%;
-            border-radius: 8px;
-        }
-        
-        .stats {
-            display: flex;
-            gap: 16px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-item {
-            flex: 1;
-            min-width: 80px;
-            text-align: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .stat-item .number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1877f2;
-        }
-        
-        .stat-item .label {
-            font-size: 12px;
-            color: #65676b;
-            margin-top: 4px;
-        }
-        
-        .log-container {
-            max-height: 200px;
-            overflow-y: auto;
-            background: #1a1a2e;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-            display: none;
-        }
-        
-        .log-container.active {
-            display: block;
-        }
-        
-        .log-line {
-            color: #4ade80;
-            font-family: monospace;
-            font-size: 12px;
-            padding: 2px 0;
-            border-bottom: 1px solid #2a2a4a;
-        }
-        
-        .log-line.error {
-            color: #f87171;
-        }
-        
-        .log-line.info {
-            color: #60a5fa;
         }
     </style>
 </head>
@@ -322,38 +219,20 @@
         <!-- Header -->
         <div class="header">
             <h1>📹 FB Auto Poster</h1>
-            <p>Post videos from Google Drive to Facebook Page</p>
-            <span class="status-badge active">✅ System Active</span>
+            <p>Post videos from Google Drive to Facebook</p>
         </div>
 
         <!-- Main Card -->
         <div class="card">
-            <h2>🎬 Video Queue</h2>
-            
-            <div class="stats" id="stats">
-                <div class="stat-item">
-                    <div class="number" id="pendingCount">0</div>
-                    <div class="label">Pending</div>
-                </div>
-                <div class="stat-item">
-                    <div class="number" id="postedCount">0</div>
-                    <div class="label">Posted</div>
-                </div>
-                <div class="stat-item">
-                    <div class="number" id="failedCount">0</div>
-                    <div class="label">Failed</div>
-                </div>
-            </div>
-
             <button class="btn-primary" id="postBtn" onclick="openModal()">
                 📤 Post Next Video
             </button>
 
-            <!-- Progress Steps -->
+            <!-- Progress -->
             <div class="progress-container" id="progressContainer">
                 <div class="progress-step" id="step1">
                     <span class="icon">📥</span>
-                    <span class="text">Fetching video from queue...</span>
+                    <span class="text">Fetching pending video...</span>
                 </div>
                 <div class="progress-step" id="step2">
                     <span class="icon">⬇️</span>
@@ -361,7 +240,7 @@
                 </div>
                 <div class="progress-step" id="step3">
                     <span class="icon">📤</span>
-                    <span class="text">Uploading to Facebook...</span>
+                    <span class="text">Posting to Facebook...</span>
                 </div>
                 <div class="progress-step" id="step4">
                     <span class="icon">✅</span>
@@ -369,19 +248,9 @@
                 </div>
             </div>
 
-            <!-- Logs -->
-            <div class="log-container" id="logContainer">
-                <div id="logContent"></div>
-            </div>
-
             <!-- Result -->
             <div class="result-card" id="resultCard">
                 <div id="resultMessage"></div>
-            </div>
-
-            <!-- Video Preview -->
-            <div class="video-preview" id="videoPreview">
-                <video controls id="previewVideo"></video>
             </div>
         </div>
 
@@ -400,9 +269,9 @@
 
     <script>
         // ============================================
-        // CONFIGURATION
+        // CONFIGURATION - API endpoint only
         // ============================================
-        const API_ENDPOINT = '/api/post-video'; // Vercel serverless function
+        const API_ENDPOINT = '/api/post-video';
 
         // ============================================
         // DOM ELEMENTS
@@ -411,53 +280,39 @@
         const captionModal = document.getElementById('captionModal');
         const captionInput = document.getElementById('captionInput');
         const progressContainer = document.getElementById('progressContainer');
-        const logContainer = document.getElementById('logContainer');
-        const logContent = document.getElementById('logContent');
         const resultCard = document.getElementById('resultCard');
         const resultMessage = document.getElementById('resultMessage');
-        const videoPreview = document.getElementById('videoPreview');
-        const previewVideo = document.getElementById('previewVideo');
         
-        // Progress steps
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
         const step3 = document.getElementById('step3');
         const step4 = document.getElementById('step4');
 
-        // Stats
-        const pendingCount = document.getElementById('pendingCount');
-        const postedCount = document.getElementById('postedCount');
-        const failedCount = document.getElementById('failedCount');
-
         // ============================================
         // FUNCTIONS
         // ============================================
 
-        // Open caption modal
         function openModal() {
             captionModal.classList.add('active');
             captionInput.value = '';
             captionInput.focus();
         }
 
-        // Close caption modal
         function closeModal() {
             captionModal.classList.remove('active');
         }
 
-        // Reset progress display
         function resetProgress() {
             const steps = [step1, step2, step3, step4];
             steps.forEach(step => {
                 step.className = 'progress-step';
                 const icon = step.querySelector('.icon');
                 const text = step.querySelector('.text');
-                // Reset icons and text
                 const icons = ['📥', '⬇️', '📤', '✅'];
                 const texts = [
-                    'Fetching video from queue...',
+                    'Fetching pending video...',
                     'Downloading from Google Drive...',
-                    'Uploading to Facebook...',
+                    'Posting to Facebook...',
                     'Updating status...'
                 ];
                 const idx = steps.indexOf(step);
@@ -466,32 +321,16 @@
             });
             
             progressContainer.classList.remove('active');
-            logContainer.classList.remove('active');
-            logContent.innerHTML = '';
             resultCard.className = 'result-card';
-            videoPreview.classList.remove('active');
             postBtn.disabled = false;
         }
 
-        // Add log entry
-        function addLog(message, type = 'info') {
-            logContainer.classList.add('active');
-            const line = document.createElement('div');
-            line.className = `log-line ${type}`;
-            const time = new Date().toLocaleTimeString();
-            line.textContent = `[${time}] ${message}`;
-            logContent.appendChild(line);
-            logContent.scrollTop = logContent.scrollHeight;
-        }
-
-        // Update progress step
         function updateStep(stepNumber, status = 'loading', message = null) {
             const steps = [step1, step2, step3, step4];
             const step = steps[stepNumber - 1];
             
             if (status === 'loading') {
                 step.className = 'progress-step';
-                // Add spinner
                 if (!step.querySelector('.spinner')) {
                     const spinner = document.createElement('div');
                     spinner.className = 'spinner';
@@ -514,18 +353,10 @@
             }
         }
 
-        // Show result
         function showResult(success, message) {
             resultCard.className = `result-card ${success ? 'success' : 'error'}`;
             resultMessage.textContent = message;
             postBtn.disabled = false;
-        }
-
-        // Update stats
-        function updateStats(pending, posted, failed) {
-            pendingCount.textContent = pending || 0;
-            postedCount.textContent = posted || 0;
-            failedCount.textContent = failed || 0;
         }
 
         // ============================================
@@ -535,29 +366,21 @@
             const caption = captionInput.value.trim();
             
             if (!caption) {
-                alert('Please enter a caption for the video');
+                alert('Please enter a caption');
                 return;
             }
             
-            // Close modal
             closeModal();
-            
-            // Reset and show progress
             resetProgress();
             progressContainer.classList.add('active');
             postBtn.disabled = true;
             
-            // Update step 1
-            updateStep(1, 'loading', 'Fetching pending video from queue...');
-            addLog('🔍 Searching for pending video...');
+            updateStep(1, 'loading');
             
             try {
-                // Call backend API
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ caption })
                 });
                 
@@ -567,29 +390,16 @@
                     throw new Error(data.error || 'Failed to post video');
                 }
                 
-                // Update stats
-                updateStats(data.pending, data.posted, data.failed);
-                
-                // Show video preview if available
-                if (data.videoUrl) {
-                    previewVideo.src = data.videoUrl;
-                    videoPreview.classList.add('active');
-                }
-                
-                // Show success
                 updateStep(4, 'done', '✅ Video posted successfully!');
-                showResult(true, `🎉 Video posted to Facebook! Post ID: ${data.postId}`);
-                addLog(`✅ Posted successfully! Post ID: ${data.postId}`, 'info');
+                showResult(true, `🎉 Posted! Post ID: ${data.postId}`);
                 
             } catch (error) {
-                console.error('Error:', error);
                 updateStep(4, 'error', '❌ Posting failed');
                 showResult(false, `❌ ${error.message}`);
-                addLog(`❌ ${error.message}`, 'error');
             }
         }
 
-        // Close modal on Enter key
+        // Close modal on Enter
         captionInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -603,22 +413,6 @@
                 closeModal();
             }
         });
-
-        // ============================================
-        // INITIALIZE
-        // ============================================
-        // Load stats on page load
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const data = await response.json();
-                updateStats(data.pending, data.posted, data.failed);
-            } catch (error) {
-                console.warn('Could not load stats:', error);
-            }
-        }
-        
-        loadStats();
     </script>
 </body>
 </html>
