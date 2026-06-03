@@ -54,13 +54,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
   }
 
-  // POST - Post to Facebook (download + upload)
+  // POST - Post to Facebook (via Supabase Storage)
   if (req.method === 'POST' && req.body.action === 'post_to_facebook') {
     const { id, link, caption } = req.body;
 
     if (!FACEBOOK_PAGE_ID || !FACEBOOK_PAGE_TOKEN) {
       return res.status(500).json({ error: 'Missing Facebook credentials' });
     }
+
+    let storagePath = '';
 
     try {
       // 1. Extract file ID from Google Drive link
@@ -71,33 +73,50 @@ export default async function handler(req, res) {
 
       // 2. Convert to direct download link
       const directLink = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-      console.log('Downloading from:', directLink);
-
-      // 3. Download the video
+      
+      // 3. Download video from Google Drive
       const videoResponse = await fetch(directLink);
       if (!videoResponse.ok) {
         throw new Error('Failed to download video from Google Drive');
       }
       const videoBuffer = await videoResponse.arrayBuffer();
 
-      // 4. Create FormData for Facebook upload
-      const formData = new FormData();
-      const videoFile = new File([videoBuffer], 'video.mp4', { type: 'video/mp4' });
-      formData.append('source', videoFile);
-      formData.append('description', caption || '');
-      formData.append('access_token', FACEBOOK_PAGE_TOKEN);
+      // 4. Generate unique filename
+      const fileName = `video_${id}_${Date.now()}.mp4`;
+      storagePath = fileName;
 
-      // 5. Post to Facebook
-      console.log('Uploading to Facebook...');
+      // 5. Upload to Supabase Storage
+      const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/video/${fileName}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'video/mp4'
+        },
+        body: videoBuffer
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload video to Supabase Storage');
+      }
+
+      // 6. Get public URL of the uploaded video
+      const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/video/${fileName}`;
+
+      // 7. Post to Facebook using the public URL
       const fbResponse = await fetch(`https://graph.facebook.com/v18.0/${FACEBOOK_PAGE_ID}/videos`, {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file_url: publicUrl,
+          description: caption || '',
+          access_token: FACEBOOK_PAGE_TOKEN
+        })
       });
 
       const fbResult = await fbResponse.json();
 
       if (fbResult.error) {
-        console.error('Facebook error:', fbResult.error);
         // Update status to failed
         await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
           method: 'PATCH',
@@ -109,10 +128,20 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({ status: 'failed' })
         });
+        
+        // Delete temp file from storage
+        await fetch(`${SUPABASE_URL}/storage/v1/object/video/${fileName}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        
         return res.status(400).json({ error: fbResult.error.message });
       }
 
-      // 6. Update status to posted
+      // 8. Update status to posted
       await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
         method: 'PATCH',
         headers: {
@@ -124,9 +153,32 @@ export default async function handler(req, res) {
         body: JSON.stringify({ status: 'posted' })
       });
 
+      // 9. Delete temp file from Supabase Storage
+      await fetch(`${SUPABASE_URL}/storage/v1/object/video/${fileName}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+
       return res.status(200).json({ success: true, fbResult });
     } catch (error) {
-      console.error('Error:', error);
+      // Clean up if any error occurred
+      if (storagePath) {
+        try {
+          await fetch(`${SUPABASE_URL}/storage/v1/object/video/${storagePath}`, {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          });
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
+      }
+
       return res.status(500).json({ error: error.message });
     }
   }
