@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FB Auto Poster - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            color: #1877f2;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+        .welcome {
+            text-align: center;
+            padding: 20px;
+            background: #f0f2f5;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .welcome h2 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .welcome p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .env-setup {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .env-setup h3 {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .env-item {
+            background: #2a2a4a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .env-item .key {
+            color: #4ade80;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .env-item .value {
+            color: #fbbf24;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 4px;
+        }
+        .env-item .description {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #166fe5;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            font-size: 12px;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .status.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .copy-btn {
+            background: #4ade80;
+            color: #1a1a2e;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .copy-btn:hover {
+            background: #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo">
+            <h1>📱 FB Auto Poster</h1>
+            <p>Facebook Page Automation System</p>
+        </div>
+
+        <!-- Welcome -->
+        <div class="welcome">
+            <h2>👋 Welcome, Admin!</h2>
+            <p>
+                Your Facebook Page is connected and ready for automation.<br>
+                <strong>Status:</strong> <span style="color: #4ade80;">✅ Active</span>
+            </p>
+        </div>
+
+        <!-- .env Setup Guide -->
+        <div class="env-setup">
+            <h3>🔐 Setup .env for Vercel</h3>
+            
+            <div class="env-item">
+                <div class="key">FACEBOOK_PAGE_ID</div>
+                <div class="value">your_page_id_here</div>
+                <div class="description">Your Facebook Page ID</div>
+            </div>
+
+            <div class="env-item">
+                <div class="key">FACEBOOK_PAGE_TOKEN</div>
+                <div class="value">your_page_token_here</div>
+                <div class="description">Your Facebook Page Access Token</div>
+            </div>
+
+            <div class="env-item">
+                <div class="key">SUPABASE_URL</div>
+                <div class="value">https://your-project.supabase.co</div>
+                <div class="description">Your Supabase project URL</div>
+            </div>
+
+            <div class="env-item">
+                <div class="key">SUPABASE_ANON_KEY</div>
+                <div class="value">your_supabase_anon_key</div>
+                <div class="description">Your Supabase anonymous key</div>
+            </div>
+
+            <div class="env-item">
+                <div class="key">NEXT_PUBLIC_APP_URL</div>
+                <div class="value">https://your-app.vercel.app</div>
+                <div class="description">Your Vercel app URL</div>
+            </div>
+
+            <!-- Copy .env template -->
+            <button class="btn" onclick="copyEnvTemplate()" style="background: #4ade80; color: #1a1a2e; margin-top: 10px;">
+                📋 Copy .env Template
+            </button>
+        </div>
+
+        <!-- Status Message -->
+        <div id="status" class="status"></div>
+
+        <!-- Next Steps -->
+        <a href="#" class="btn" onclick="showNextSteps()">
+            🚀 Go to Dashboard
+        </a>
+
+        <!-- Footer -->
+        <div class="footer">
+            Built with ❤️ for Facebook Automation • v1.0
+        </div>
+    </div>
+
+    <script>
+        // Copy .env template to clipboard
+        function copyEnvTemplate() {
+            const envTemplate = `# Facebook Configuration
+FACEBOOK_PAGE_ID=your_page_id_here
+FACEBOOK_PAGE_TOKEN=your_page_token_here
+
+# Supabase Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app`;
+
+            navigator.clipboard.writeText(envTemplate).then(() => {
+                showStatus('✅ .env template copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = envTemplate;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showStatus('✅ .env template copied to clipboard!', 'success');
+            });
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            setTimeout(() => {
+                status.className = 'status';
+            }, 5000);
+        }
+
+        // Show next steps
+        function showNextSteps() {
+            const steps = [
+                '1️⃣ Create a .env file in your project root',
+                '2️⃣ Add your Facebook credentials',
+                '3️⃣ Add your Supabase credentials',
+                '4️⃣ Deploy to Vercel with environment variables',
+                '5️⃣ Start posting videos automatically!'
+            ];
+            
+            const status = document.getElementById('status');
+            status.innerHTML = steps.map(step => `📌 ${step}`).join('<br>');
+            status.className = 'status success';
+        }
+
+        // Check if we have page token stored
+        document.addEventListener('DOMContentLoaded', function() {
+            const pageToken = localStorage.getItem('facebook_page_token');
+            const pageId = localStorage.getItem('facebook_page_id');
+            
+            if (pageToken && pageId) {
+                // Update the .env guide with actual values
+                document.querySelectorAll('.env-item .value')[0].textContent = pageId;
+                document.querySelectorAll('.env-item .value')[1].textContent = pageToken.substring(0, 20) + '...' + pageToken.substring(pageToken.length - 10);
+            }
+        });
+    </script>
+</body>
+</html>
